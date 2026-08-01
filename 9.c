@@ -1,110 +1,152 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
+#include<stdio.h>
+#include<stdlib.h>
 
-int count = 0;  // single counter for comparisons
+int n;
+int opcount=0;
+int top=-1;
+int isCycle=0;
 
-void swap(int *a, int *b) {
-    int temp = *a;
-    *a = *b;
-    *b = temp;
-}
+void dfs(int n, int mat[n][n], int vis[], int track[], int source, int stack[])
+{
+    vis[source]=1;
+    track[source]=1;
 
-void heapify(int arr[], int n, int i) {
-    int largest = i;
-    int left = 2*i + 1;
-    int right = 2*i + 2;
+    for(int i=0;i<n;i++)
+    {
+        opcount++;
 
-    if (left < n) {
-        count++;
-        if (arr[left] > arr[largest]) largest = left;
+        if(mat[source][i] && vis[i] && track[i])
+        {
+            isCycle=1;
+            return;
+        }
+
+        if(mat[source][i] && !vis[i])
+            dfs(n,mat,vis,track,i,stack);
     }
 
-    if (right < n) {
-        count++;
-        if (arr[right] > arr[largest]) largest = right;
+    stack[++top]=source;
+    track[source]=0;
+}
+
+void topologicalSort(int n, int mat[n][n], int stack[])
+{
+    int vis[n];
+    int track[n];
+
+    for(int i=0;i<n;i++)
+    {
+        vis[i]=0;
+        track[i]=0;
     }
 
-    if (largest != i) {
-        swap(&arr[i], &arr[largest]);
-        heapify(arr, n, largest);
+    for(int i=0;i<n;i++)
+    {
+        if(!vis[i])
+            dfs(n,mat,vis,track,i,stack);
     }
 }
 
-void heapSort(int arr[], int n) {
-    // Build max heap
-    for (int i = n/2 - 1; i >= 0; i--)
-        heapify(arr, n, i);
+void tester()
+{
+    printf("Enter number of vertices:\n");
+    scanf("%d",&n);
 
-    // Extract elements one by one
-    for (int i = n - 1; i > 0; i--) {
-        swap(&arr[0], &arr[i]);
-        heapify(arr, i, 0);
+    int adjMat[n][n];
+    int stack[n];
+
+    printf("Enter adjacency matrix:\n");
+
+    for(int i=0;i<n;i++)
+    {
+        for(int j=0;j<n;j++)
+        {
+            scanf("%d",&adjMat[i][j]);
+        }
     }
+
+    top=-1;
+    isCycle=0;
+
+    topologicalSort(n,adjMat,stack);
+
+    if(isCycle)
+    {
+        printf("Cycle Exists. Cannot perform Topological Sort\n");
+        return;
+    }
+
+    printf("Topological Order:\n");
+
+    while(top!=-1)
+    {
+        printf("%d ",stack[top--]);
+    }
+
+    printf("\n");
 }
 
-void tester() {
-    int n;
-    printf("Enter array size: ");
-    scanf("%d", &n);
+void plotter()
+{
+    FILE *f1;
 
-    int arr[n];
-    printf("Enter array elements:\n");
-    for (int i = 0; i < n; i++) scanf("%d", &arr[i]);
+    f1=fopen("bfsMatTopSort.txt","w");
 
-    count = 0;
-    heapSort(arr, n);
+    for(int k=1;k<=10;k++)
+    {
+        n=k;
 
-    printf("Sorted Array:\n");
-    for (int i = 0; i < n; i++) printf("%d ", arr[i]);
-    printf("\nComparisons: %d\n", count);
-}
+        int adjMat[n][n];
+        int stack[n];
 
-void plotter() {
-    srand(time(NULL));
-    FILE *f1 = fopen("heapBest.txt", "w");
-    FILE *f2 = fopen("heapWorst.txt", "w");
-    FILE *f3 = fopen("heapAvg.txt", "w");
+        for(int i=0;i<n;i++)
+        {
+            for(int j=0;j<n;j++)
+            {
+                adjMat[i][j]=0;
+            }
+        }
 
-    int n = 100;
-    while (n <= 1000) {
-        int arr[n];
+        for(int i=0;i<n-1;i++)
+        {
+            for(int j=i+1;j<n;j++)
+            {
+                adjMat[i][j]=1;
+            }
+        }
 
-        // Best Case (descending order)
-        for (int i = 0; i < n; i++) arr[i] = n - i;
-        count = 0;
-        heapSort(arr, n);
-        fprintf(f1, "%d\t%d\n", n, count);
+        opcount=0;
+        top=-1;
+        isCycle=0;
 
-        // Worst Case (ascending order)
-        for (int i = 0; i < n; i++) arr[i] = i + 1;
-        count = 0;
-        heapSort(arr, n);
-        fprintf(f2, "%d\t%d\n", n, count);
+        topologicalSort(n,adjMat,stack);
 
-        // Average Case (random)
-        for (int i = 0; i < n; i++) arr[i] = rand() % n;
-        count = 0;
-        heapSort(arr, n);
-        fprintf(f3, "%d\t%d\n", n, count);
-
-        n += 100;
+        fprintf(f1,"%d\t%d\n",n,opcount);
     }
 
     fclose(f1);
-    fclose(f2);
-    fclose(f3);
 }
 
-int main() {
-    int ch;
-    printf("Enter\n1.Tester\n2.Plotter\n");
-    scanf("%d", &ch);
+int main()
+{
+    int choice;
 
-    switch (ch) {
-        case 1: tester(); break;
-        case 2: plotter(); break;
-        default: printf("Invalid Choice\n");
+    printf("Enter\n1.Tester\n2.Plotter\n");
+    scanf("%d",&choice);
+
+    switch(choice)
+    {
+        case 1:
+            tester();
+            break;
+
+        case 2:
+            plotter();
+            break;
+
+        default:
+            printf("Invalid Choice\n");
     }
+
     return 0;
 }

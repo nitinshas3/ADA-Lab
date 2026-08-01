@@ -1,0 +1,7 @@
+set title "mergesort"
+set range autoscale
+set xlabel "intput size"
+set ylabel " operation count"
+set style data linepoints
+plot "best.txt" title "best case " , "worst.txt" title "worst"
+pause -1
