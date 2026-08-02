@@ -1,135 +1,101 @@
-// prims
 #include <stdio.h>
-#include <limits.h>
+#include <stdlib.h>
 
-int n, opcount = 0;
+#define INF 9999
 
-int prims(int adjMat[100][100])
-{
-    int parent[100], key[100], visited[100];
-    int cost = 0;
+int graph[20][20];
+int visited[20];
+int n;
+int count;
 
-    // Initialization
-    for(int i=0;i<n;i++)
-    {
-        key[i] = INT_MAX;
+// Prim's Algorithm
+void prim() {
+    int edges = 0;
+    int min, x = 0, y = 0;
+
+    for (int i = 0; i < n; i++)
         visited[i] = 0;
-        parent[i] = -1;
-    }
 
-    key[0] = 0;
+    visited[0] = 1;
 
-    // Prim's Algorithm
-    for(int count=0; count<n-1; count++)
-    {
-        int min = INT_MAX, u = -1;
+    printf("\nEdges in Minimum Spanning Tree:\n");
 
-        // Find minimum key vertex
-        for(int i=0;i<n;i++)
-        {
-            opcount++;
-            if(!visited[i] && key[i] < min)
-            {
-                min = key[i];
-                u = i;
+    while (edges < n - 1) {
+        min = INF;
+
+        for (int i = 0; i < n; i++) {
+            if (visited[i]) {
+                for (int j = 0; j < n; j++) {
+                    count++;  // basic operation
+
+                    if (!visited[j] && graph[i][j] < min) {
+                        min = graph[i][j];
+                        x = i;
+                        y = j;
+                    }
+                }
             }
         }
 
-        visited[u] = 1;
+        printf("%d -> %d : %d\n", x, y, graph[x][y]);
 
-        // Update adjacent vertices
-        for(int v=0;v<n;v++)
-        {
-            opcount++;
-
-            if(adjMat[u][v] != INT_MAX &&
-               !visited[v] &&
-               adjMat[u][v] < key[v])
-            {
-                key[v] = adjMat[u][v];
-                parent[v] = u;
-            }
-        }
+        visited[y] = 1;
+        edges++;
     }
-
-    printf("\nEdges in MST:\n");
-
-    for(int i=1;i<n;i++)
-    {
-        printf("%d - %d\n", parent[i], i);
-        cost += key[i];
-    }
-
-    return cost;
 }
 
-void tester()
-{
-    int adjMat[100][100];
-
+// Correctness check
+void correctness() {
     printf("Enter number of vertices: ");
-    scanf("%d",&n);
+    scanf("%d", &n);
 
-    printf("Enter adjacency matrix (-1 for no edge):\n");
+    printf("Enter Cost Matrix (9999 for INF):\n");
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            scanf("%d", &graph[i][j]);
 
-    for(int i=0;i<n;i++)
-        for(int j=0;j<n;j++)
-        {
-            scanf("%d",&adjMat[i][j]);
-
-            if(adjMat[i][j]==-1)
-                adjMat[i][j]=INT_MAX;
-        }
-
-    opcount = 0;
-
-    printf("\nMinimum Cost = %d\n",prims(adjMat));
-
-    printf("Operation Count = %d\n",opcount);
+    count = 0;
+    prim();
+    printf("\nCount = %d\n", count);
 }
 
-void plotter()
-{
-    FILE *fp=fopen("prims.txt","w");
+// Analysis with only dense graph
+void analysis() {
+    FILE *fp = fopen("PrimsDense.txt", "w");
 
-    for(n=5;n<=25;n+=5)
-    {
-        int adjMat[100][100];
-
-        for(int i=0;i<n;i++)
-            for(int j=0;j<n;j++)
-            {
-                if(i==j)
-                    adjMat[i][j]=0;
+    for (n = 4; n <= 10; n++) {
+        // Dense Graph
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (i == j)
+                    graph[i][j] = 0;
                 else
-                    adjMat[i][j]=i+j+1;
+                    graph[i][j] = i + j + 1;
             }
+        }
 
-        opcount=0;
-
-        prims(adjMat);
-
-        fprintf(fp,"%d %d\n",n,opcount);
+        count = 0;
+        prim();
+        fprintf(fp, "%d\t%d\n", n, count);
     }
 
     fclose(fp);
 
-    printf("Data stored in prims.txt\n");
+    printf("\nAnalysis stored in PrimsDense.txt\n");
+    system("gnuplot > load 'command.txt'");
 }
 
-int main()
-{
-    int ch;
+int main() {
+    int choice;
+    printf("1. Correctness Check\n");
+    printf("2. Analysis\n");
+    printf("Enter Choice: ");
+    scanf("%d", &choice);
 
-    printf("1.Tester\n2.Plotter\n");
-    scanf("%d",&ch);
-
-    switch(ch)
-    {
-        case 1: tester(); break;
-        case 2: plotter(); break;
-        default: printf("Invalid Choice");
+    switch (choice) {
+        case 1: correctness(); break;
+        case 2: analysis(); break;
+        default: printf("Invalid Choice\n");
     }
-
     return 0;
 }

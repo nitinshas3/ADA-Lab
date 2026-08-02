@@ -18,7 +18,7 @@ void dijkstra(int adjMat[100][100], int source)
     dist[source] = 0;
 
     // Dijkstra Algorithm
-    for(int count=0; count<n-1; count++)
+    for(int count=0; count<n-1; count++) // this is k 
     {
         int min = INT_MAX, u = -1;
 
@@ -35,7 +35,7 @@ void dijkstra(int adjMat[100][100], int source)
 
         visited[u] = 1;
 
-        // Update distances
+        // Update distances // relaxing the vertices
         for(int v=0;v<n;v++)
         {
             opcount++;

@@ -53,24 +53,15 @@ void plotter() {
     FILE *f3 = fopen("subtraction.txt", "w");
 
     for (int n = 10; n <= 100; n += 10) {
-        int maxE = 0, maxC = 0, maxS = 0;
+        // Worst case chosen as (n, n-1) for all methods
+        gcdEuclid(n, n-1);
+        fprintf(f1, "%d\t%d\n", n, count);
 
-        for (int i = 2; i <= n; i++) {
-            for (int j = 2; j <= n; j++) {
-                gcdEuclid(i, j);
-                if (count > maxE) maxE = count;
+        gcdConsecutive(n, n-1);
+        fprintf(f2, "%d\t%d\n", n, count);
 
-                gcdConsecutive(i, j);
-                if (count > maxC) maxC = count;
-
-                gcdSubtraction(i, j);
-                if (count > maxS) maxS = count;
-            }
-        }
-
-        fprintf(f1, "%d\t%d\n", n, maxE);
-        fprintf(f2, "%d\t%d\n", n, maxC);
-        fprintf(f3, "%d\t%d\n", n, maxS);
+        gcdSubtraction(n, n-1);
+        fprintf(f3, "%d\t%d\n", n, count);
     }
 
     fclose(f1);

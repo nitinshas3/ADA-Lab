@@ -1,5 +1,6 @@
 set title "mergesort"
-set range autoscale
+set xrange [1:100]
+set yrange [1:100]
 set xlabel "intput size"
 set ylabel " operation count"
 set style data linepoints
